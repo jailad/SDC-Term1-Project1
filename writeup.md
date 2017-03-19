@@ -8,7 +8,7 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[TestImageSolidWhiteRight =432]: ./test_images/solidWhiteRight.jpg "Solid White Right"
+[TestImageSolidWhiteRight]: ./test_images/solidWhiteRight.jpg "Solid White Right"
 [TestImageOutputSolidWhiteRight]: ./test_images_output/solidWhiteRight.jpg "Solid White Right"
 
 ---
@@ -24,7 +24,7 @@ My pipeline consisted of the following steps:
 
 As an example, this is the original image
 
-![solidWhiteRight.jpg - Original Image][TestImageSolidWhiteRight]
+![solidWhiteRight.jpg - Original Image][TestImageSolidWhiteRight =432]
 ![Detected lane(s) in red overlaid over the original image][TestImageOutputSolidWhiteRight]
 
 TBD - In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
