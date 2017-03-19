@@ -9,7 +9,8 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/grayscale.jpg "Grayscale"
+[TestImageSolidWhiteRight]: ./test_images/solidWhiteRight.jpg "Solid White Right"
+[TestImageOutputSolidWhiteRight]: ./test_images_output/solidWhiteRight.jpg "Solid White Right"
 
 ---
 
@@ -17,25 +18,32 @@ The goals / steps of this project are the following:
 
 ###1. Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
 
-My pipeline consisted of 5 steps. First, I converted the images to grayscale, then I .... 
+My pipeline consisted of the following steps:
 
-In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
+1. Gray scaling.
+2. Gaussian Smoothing.
+3. Canny Edge Detection.
+4. Hough Transform Detection.
+5. Region Of Interest Selection.
+6. Overlaying the detected lane(s) on top of the original image.
 
-If you'd like to include images to show how the pipeline works, here is how to include an image: 
+As an example, this is the original image
 
-![alt text][image1]
+![solidWhiteRight.jpg - Original Image][TestImageSolidWhiteRight]
+![Detected lane(s) in red overlaid over the original image][TestImageOutputSolidWhiteRight]
 
+TBD - In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
 
 ###2. Identify potential shortcomings with your current pipeline
 
+Currently towards the far end of the pipeline if there is a car within the region of interest, it shows up. I need to find a better way of excluding such objects from region of interest.
 
-One potential shortcoming would be what would happen when ... 
+Currently shortcoming is that the region of interest is currently hard coded, so in order to generalize it to real-world situations, this will have to be dynamically generated.
 
-Another shortcoming could be ...
+Another shortcoming is dealing with curved roads. One potential technique to address it would be to have an adaptive region of interest polygon. 
 
 
 ###3. Suggest possible improvements to your pipeline
 
-A possible improvement would be to ...
-
-Another potential improvement could be to ...
+Dynamic region of interest generation.
+Ensuring code is optimized so that it runs quickly.
