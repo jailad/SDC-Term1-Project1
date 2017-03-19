@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[105]:
+# In[128]:
 
 # Importing the necessary packages
 import matplotlib.pyplot as plt
@@ -10,6 +10,7 @@ import numpy as np
 import cv2
 import math
 import os
+import datetime
 get_ipython().magic('matplotlib inline')
 
 # Packages below needed to edit/save/watch video clips
@@ -17,8 +18,17 @@ from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 
 
-# In[127]:
+# In[143]:
 
+
+# Constants
+kTestImagesRelativeInputPathDir = "test_images/"
+kTestImagesRelativeOutputPathDir = "test_images_output/"
+kTestVideosRelativeInputPathDir = "test_videos/"
+kTestVideosRelativeOutputPathDir = "test_videos_output/"
+
+# This boolean is used to determine if we need to produce intermediate image artifacts, after each processing operation like Gray Scaling etc.
+generateIntermediateArtifacts = False
 
 # Helper method(s)
 def grayscale(img):
@@ -61,9 +71,11 @@ def weighted_img(img, initial_img, α=0.8, β=1, λ=0):
     return cv2.addWeighted(initial_img, α, img, β, λ)
 
 def process_image(image):
+    currentTime = datetime.datetime.now()
+    currentTimeString = str(currentTime)
     # Important to not modify the original image, but instead work on it's copy
-    image_copy = np.copy(image)
-    greyscale_image = grayscale(image_copy)
+    original_image_copy = np.copy(image)
+    greyscale_image = grayscale(original_image_copy)    
     gaussian_blurred_image = gaussian_blur(greyscale_image,5)
     canny_image = canny(gaussian_blurred_image,50,150)
     hough_lines_image = hough_lines(canny_image, 2, np.pi/180, 15, 4, 10)
@@ -77,13 +89,37 @@ def process_image(image):
     region_of_interest_vertices = np.array([[left_top,right_top,right_bottom,left_bottom]], dtype=np.int32)
     region_of_interest_image = region_of_interest(hough_lines_image,region_of_interest_vertices)
 
-    original_image_overlaid_with_lanes = weighted_img(region_of_interest_image,image_copy)
+    original_image_overlaid_with_lanes = weighted_img(region_of_interest_image,original_image_copy)
+    
+    if generateIntermediateArtifacts == True:
+        original_image_copy_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_1_original_image_copy.jpg" 
+        plt.imshow(original_image_copy,cmap='gray')
+        plt.savefig(original_image_copy_filename)
+        
+        greyscale_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_2_grayscale_image.jpg" 
+        plt.imshow(greyscale_image,cmap='gray')
+        plt.savefig(greyscale_image_filename)
+        
+        gaussian_blurred_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_3_gaussian_blurred_image.jpg" 
+        plt.imshow(gaussian_blurred_image,cmap='gray')
+        plt.savefig(gaussian_blurred_image_filename)
+        
+        canny_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_4_canny_image.jpg" 
+        plt.imshow(canny_image,cmap='gray')
+        plt.savefig(canny_image_filename)
+        
+        hough_lines_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_5_hough_lines_image.jpg" 
+        plt.imshow(hough_lines_image,cmap='gray')
+        plt.savefig(hough_lines_image_filename)
+        
+        region_of_interest_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_6_region_of_interest_image.jpg" 
+        plt.imshow(region_of_interest_image,cmap='gray')
+        plt.savefig(region_of_interest_image_filename)
 
     return original_image_overlaid_with_lanes
 
-# Using the Pipeline above to process image(s)
-kTestImagesRelativeInputPathDir = "test_images/"
-kTestImagesRelativeOutputPathDir = "test_images_output/"
+# # Using the Pipeline above to process image(s)
+generateIntermediateArtifacts = True
 testImagesInputDirectory = os.listdir(kTestImagesRelativeInputPathDir)
 for imageFile in testImagesInputDirectory:
    input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
@@ -92,9 +128,8 @@ for imageFile in testImagesInputDirectory:
    plt.imshow(image_with_detected_lanes)
    plt.savefig(output_file_relative_path)
 
-# Using the Pipeline above to process video(s)
-kTestVideosRelativeInputPathDir = "test_videos/"
-kTestVideosRelativeOutputPathDir = "test_videos_output/"
+# # Using the Pipeline above to process video(s)
+generateIntermediateArtifacts = False
 testVideosInputDirectory = os.listdir(kTestVideosRelativeInputPathDir)
 for videoFile in testVideosInputDirectory:
    input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
