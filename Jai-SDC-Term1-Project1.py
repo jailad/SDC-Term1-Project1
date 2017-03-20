@@ -78,18 +78,18 @@ def process_image(image):
     greyscale_image = grayscale(original_image_copy)    
     gaussian_blurred_image = gaussian_blur(greyscale_image,5)
     canny_image = canny(gaussian_blurred_image,50,150)
-    hough_lines_image = hough_lines(canny_image, 2, np.pi/180, 15, 4, 10)
-    xsize = hough_lines_image.shape[1]
-    ysize = hough_lines_image.shape[0]
+    
+    xsize = canny_image.shape[1]
+    ysize = canny_image.shape[0]
     y_offset = 42
     left_bottom = [120, ysize]
     right_bottom = [850, ysize]
     left_top = [480, ysize/2 + y_offset]
     right_top = [490, ysize/2 + y_offset]
     region_of_interest_vertices = np.array([[left_top,right_top,right_bottom,left_bottom]], dtype=np.int32)
-    region_of_interest_image = region_of_interest(hough_lines_image,region_of_interest_vertices)
-
-    original_image_overlaid_with_lanes = weighted_img(region_of_interest_image,original_image_copy)
+    region_of_interest_image = region_of_interest(canny_image,region_of_interest_vertices)
+    hough_lines_image = hough_lines(region_of_interest_image, 2, np.pi/180, 15, 4, 10)
+    original_image_overlaid_with_lanes = weighted_img(hough_lines_image,original_image_copy)
     
     if generateIntermediateArtifacts == True:
         original_image_copy_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_1_original_image_copy.jpg" 
@@ -108,13 +108,13 @@ def process_image(image):
         plt.imshow(canny_image,cmap='gray')
         plt.savefig(canny_image_filename)
         
-        hough_lines_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_5_hough_lines_image.jpg" 
-        plt.imshow(hough_lines_image,cmap='gray')
-        plt.savefig(hough_lines_image_filename)
-        
-        region_of_interest_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_6_region_of_interest_image.jpg" 
+        region_of_interest_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_5_region_of_interest_image.jpg" 
         plt.imshow(region_of_interest_image,cmap='gray')
         plt.savefig(region_of_interest_image_filename)
+        
+        hough_lines_image_filename = kTestImagesRelativeOutputPathDir + currentTimeString + "_6_hough_lines_image.jpg" 
+        plt.imshow(hough_lines_image,cmap='gray')
+        plt.savefig(hough_lines_image_filename)       
 
     return original_image_overlaid_with_lanes
 
