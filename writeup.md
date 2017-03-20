@@ -12,9 +12,8 @@ The goals / steps of this project are the following:
 [TestImageSolidWhiteRight_Gray]: ./test_images_output/solidWhiteRight_2_grayscale_image.jpg "Solid White Right"
 [TestImageSolidWhiteRight_Gaussian]: ./test_images_output/solidWhiteRight_3_gaussian_blurred_image.jpg "Solid White Right"
 [TestImageSolidWhiteRight_Canny]: ./test_images_output/solidWhiteRight_4_canny_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_Hough]: ./test_images_output/solidWhiteRight_5_hough_lines_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_ROI]: ./test_images_output/solidWhiteRight_6_region_of_interest_image.jpg "Solid White Right"
-
+[TestImageSolidWhiteRight_ROI]: ./test_images_output/solidWhiteRight_5_region_of_interest_image.jpg "Solid White Right"
+[TestImageSolidWhiteRight_Hough]: ./test_images_output/solidWhiteRight_6_hough_lines_image.jpg "Solid White Right"
 
 [TestImageSolidWhiteRight_Final]: ./test_images_output/solidWhiteRight.jpg "Solid White Right Final"
 
@@ -30,26 +29,21 @@ The goals / steps of this project are the following:
 
 ![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Gray]
 
-
 * Gaussian Smoothing.
 
 ![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Gaussian]
-
 
 * Canny Edge Detection.
 
 ![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Canny]
 
-
-* Hough Transform Detection.
-
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Hough]
-
-
 * Region Of Interest Selection.
 
 ![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_ROI]
 
+* Hough Transform Detection.
+
+![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Hough]
 
 * Overlaying the detected lane(s) on top of the original image.
 
