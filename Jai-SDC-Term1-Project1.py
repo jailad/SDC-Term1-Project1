@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[128]:
+# In[10]:
 
 # Importing the necessary packages
 import matplotlib.pyplot as plt
@@ -11,6 +11,7 @@ import cv2
 import math
 import os
 import datetime
+from math import sqrt
 get_ipython().magic('matplotlib inline')
 
 # Packages below needed to edit/save/watch video clips
@@ -18,7 +19,7 @@ from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 
 
-# In[143]:
+# In[9]:
 
 
 # Constants
@@ -27,10 +28,26 @@ kTestImagesRelativeOutputPathDir = "test_images_output/"
 kTestVideosRelativeInputPathDir = "test_videos/"
 kTestVideosRelativeOutputPathDir = "test_videos_output/"
 
+# Global variable(s)
+
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+
 # This boolean is used to determine if we need to produce intermediate image artifacts, after each processing operation like Gray Scaling etc.
 generateIntermediateArtifacts = False
 
 # Helper method(s)
+def get_region_of_interest_vertices(image):
+    xsize = image.shape[1]
+    ysize = image.shape[0]
+    y_offset = 42
+    left_bottom = [120, ysize]
+    right_bottom = [850, ysize]
+    left_top = [480, ysize/2 + y_offset]
+    right_top = [490, ysize/2 + y_offset]
+    region_of_interest_vertices = np.array([[left_top,right_top,right_bottom,left_bottom]], dtype=np.int32)
+    return region_of_interest_vertices
+
 def grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     # Or use BGR2GRAY if you read an image with cv2.imread()
@@ -60,6 +77,81 @@ def region_of_interest(img, vertices):
 
 def canny(img, low_threshold, high_threshold):
     return cv2.Canny(img, low_threshold, high_threshold)
+
+def draw_lines(img, lines, color=[255, 0, 0], thickness=10):
+        
+ try:
+    global global_previous_left_lane_bottom_roi_intersection_point
+    global global_previous_right_lane_bottom_roi_intersection_point
+    leftLaneLineMaxLength = 0
+    rightLaneLineMaxLength = 0
+    longestLeftLaneLine = (0,0,0,0)
+    longestRightLaneLine = (0,0,0,0)
+
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            dy = y2 - y1
+            dx = x2 - x1
+            slope = dy / dx
+            lineLength = sqrt(dy**2 + dx**2)
+            
+            if slope < 0:
+               if(lineLength > leftLaneLineMaxLength):
+                    leftLaneLineMaxLength = lineLength
+                    longestLeftLaneLine = line
+                    
+            else:
+               if(lineLength > rightLaneLineMaxLength):
+                    rightLaneLineMaxLength = lineLength
+                    longestRightLaneLine = line                
+    
+    region_of_interest_vertices = get_region_of_interest_vertices(img)
+    region_of_interest_left_top = region_of_interest_vertices[0][0]
+    region_of_interest_right_top = region_of_interest_vertices[0][1]
+    region_of_interest_right_bottom = region_of_interest_vertices[0][2]
+    region_of_interest_left_bottom = region_of_interest_vertices[0][3]
+    
+    region_of_interest_top_line = get_line(region_of_interest_left_top, region_of_interest_right_top)
+    region_of_interest_bottom_line = get_line(region_of_interest_left_bottom, region_of_interest_right_bottom)
+
+    longest_left_lane_line = get_line([longestLeftLaneLine[0][0],longestLeftLaneLine[0][1]],[longestLeftLaneLine[0][2],longestLeftLaneLine[0][3]])
+    
+    longest_right_lane_line = get_line([longestRightLaneLine[0][0],longestRightLaneLine[0][1]],[longestRightLaneLine[0][2],longestRightLaneLine[0][3]])
+    
+    top_left_intersection_point = intersection(region_of_interest_top_line, longest_left_lane_line)
+    bottom_left_intersection_point = intersection(region_of_interest_bottom_line, longest_left_lane_line)    
+    if global_previous_left_lane_bottom_roi_intersection_point == (0,0):
+        global_previous_left_lane_bottom_roi_intersection_point = bottom_left_intersection_point
+        
+    top_right_intersection_point = intersection(region_of_interest_top_line, longest_right_lane_line)
+    bottom_right_intersection_point = intersection(region_of_interest_bottom_line, longest_right_lane_line)
+    if global_previous_right_lane_bottom_roi_intersection_point == (0,0):
+        global_previous_right_lane_bottom_roi_intersection_point = bottom_right_intersection_point
+    
+    if (top_left_intersection_point and bottom_left_intersection_point and top_right_intersection_point and bottom_right_intersection_point):
+        cv2.line(img, tuple(top_left_intersection_point), tuple(global_previous_left_lane_bottom_roi_intersection_point), color, thickness)
+        cv2.line(img, tuple(top_right_intersection_point), tuple(global_previous_right_lane_bottom_roi_intersection_point), color, thickness)
+
+      
+ except TypeError: 
+        print("Ignoring sporadic type error as noise.")
+    
+def get_line(p1, p2):
+    A = (p1[1] - p2[1])
+    B = (p2[0] - p1[0])
+    C = (p1[0]*p2[1] - p2[0]*p1[1])
+    return A, B, -C
+
+def intersection(L1, L2):
+    D  = L1[0] * L2[1] - L1[1] * L2[0]
+    Dx = L1[2] * L2[1] - L1[1] * L2[2]
+    Dy = L1[0] * L2[2] - L1[2] * L2[0]
+    if D != 0:
+        x = Dx / D
+        y = Dy / D
+        return (int(x),int(y))
+    else:
+        return False
 
 def hough_lines(img, rho, theta, threshold, min_line_len, max_line_gap):
     lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len, maxLineGap=max_line_gap)
@@ -119,24 +211,30 @@ def process_image(image):
     return original_image_overlaid_with_lanes
 
 # # Using the Pipeline above to process image(s)
-generateIntermediateArtifacts = True
+generateIntermediateArtifacts = False
 testImagesInputDirectory = os.listdir(kTestImagesRelativeInputPathDir)
 for imageFile in testImagesInputDirectory:
-   input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
-   output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
-   image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
-   plt.imshow(image_with_detected_lanes)
-   plt.savefig(output_file_relative_path)
+    if '.jpg' in imageFile:
+        global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+        global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+        input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+        output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+        image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+        plt.imshow(image_with_detected_lanes)
+        plt.savefig(output_file_relative_path)
 
 # # Using the Pipeline above to process video(s)
 generateIntermediateArtifacts = False
 testVideosInputDirectory = os.listdir(kTestVideosRelativeInputPathDir)
 for videoFile in testVideosInputDirectory:
-   input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
-   output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
-   input_clip = VideoFileClip(input_videofile_relative_path)
-   output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
-   get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
+       if '.mp4' in videoFile:
+           global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+           global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+           input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
+           output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
+           input_clip = VideoFileClip(input_videofile_relative_path)
+           output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
+           get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
 
 
 

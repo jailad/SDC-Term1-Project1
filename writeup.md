@@ -8,14 +8,15 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[TestImageSolidWhiteRight_Original]: ./test_images_output/solidWhiteRight_1_original_image_copy.jpg "Solid White Right"
-[TestImageSolidWhiteRight_Gray]: ./test_images_output/solidWhiteRight_2_grayscale_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_Gaussian]: ./test_images_output/solidWhiteRight_3_gaussian_blurred_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_Canny]: ./test_images_output/solidWhiteRight_4_canny_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_ROI]: ./test_images_output/solidWhiteRight_5_region_of_interest_image.jpg "Solid White Right"
-[TestImageSolidWhiteRight_Hough]: ./test_images_output/solidWhiteRight_6_hough_lines_image.jpg "Solid White Right"
+[TestImageSolidWhiteRight_Original]: ./test_images_output/solidWhiteRight_1_original_image_copy.jpg "Solid White Right - Original "
+[TestImageSolidWhiteRight_Gray]: ./test_images_output/solidWhiteRight_2_grayscale_image.jpg "Solid White Right - Gray Scale"
+[TestImageSolidWhiteRight_Gaussian]: ./test_images_output/solidWhiteRight_3_gaussian_blurred_image.jpg "Solid White Right - Gaussian"
+[TestImageSolidWhiteRight_Canny]: ./test_images_output/solidWhiteRight_4_canny_image.jpg "Solid White Right - Canny"
+[TestImageSolidWhiteRight_ROI]: ./test_images_output/solidWhiteRight_5_region_of_interest_image.jpg "Solid White Right - Region Of Interest Selected"
+[TestImageSolidWhiteRight_Hough]: ./test_images_output/solidWhiteRight_6_hough_lines_image.jpg "Solid White Right - Hough Lines with detected edges"
+[TestImageSolidWhiteRight_Hough_SolidLines]: ./test_images_output/solidWhiteRight_7_hough_lines_image_solid_lines.jpg "Solid White Right - with solid line"
 
-[TestImageSolidWhiteRight_Final]: ./test_images_output/solidWhiteRight.jpg "Solid White Right Final"
+[TestImageSolidWhiteRight_Final]: ./test_images_output/solidWhiteRight.jpg "Solid White Right - Final image with overlay"
 
 ---
 
@@ -23,34 +24,62 @@ The goals / steps of this project are the following:
 
 * Reading the original image.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Original]
+![][TestImageSolidWhiteRight_Original]
 
 * Gray scaling.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Gray]
+![][TestImageSolidWhiteRight_Gray]
 
 * Gaussian Smoothing.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Gaussian]
+![][TestImageSolidWhiteRight_Gaussian]
 
 * Canny Edge Detection.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Canny]
+![][TestImageSolidWhiteRight_Canny]
 
 * Region Of Interest Selection.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_ROI]
+![][TestImageSolidWhiteRight_ROI]
 
 * Hough Transform Detection.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Hough]
+![][TestImageSolidWhiteRight_Hough]
+
+* Hough Transform Detection - with Solid lines
+
+![][TestImageSolidWhiteRight_Hough_SolidLines]
 
 * Overlaying the detected lane(s) on top of the original image.
 
-![Detected lane(s) in red overlaid over the original image][TestImageSolidWhiteRight_Final]
+![][TestImageSolidWhiteRight_Final]
+
+**Output Video(s)** : 
+
+* solidWhiteRight.mp4
+
+<video width="432" height="288" controls>
+  <source src="test_videos_output/solidWhiteRight.mp4" type="video/mp4">
+</video>
+
+* solidYellowLeft.mp4
+
+<video width="432" height="288" controls>
+  <source src="test_videos_output/solidYellowLeft.mp4" type="video/mp4">
+</video>
+
+* challenge.mp4
+
+<video width="432" height="288" controls>
+  <source src="test_videos_output/challenge.mp4" type="video/mp4">
+</video>
 
 
-**TBD** - In order to draw a single line on the left and right lanes, I modified the draw_lines() function by ...
+**In order to draw a single line on the left and right lanes, I modified the draw_lines() function by :**
+1. Categorizing the line segment(s) from hough transform within the region of interest, into left lane, or right lane, using the slope. ( > 0, or < 0).
+2. From the left and right lane line(s) determining the longest straight line, and using that as a reference line.
+3. Determining the point of intersection of the above reference line(s) with the top line and bottom line representing the region of interest.
+4. Connecting the intersection point(s) on the left to create the solid left lane, and doing the same for the right lane.
 
 **Potential shortcomings:**
 
@@ -61,4 +90,8 @@ The goals / steps of this project are the following:
 **Potential improvements:**
 
 1. Dynamic region of interest generation - currently this is hard coded.
-2. Ensuring code is optimized so that it runs quickly.
+2. Ensuring code is optimized so that it runs in the most optimal manner.
+3. Static analysis of code to improve it.
+4. The output can be smoothened further. I am currently applying some level of smoothing but it can obviously be improved.
+5. Better handling of curved line(s).
+
