@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[10]:
+# In[ ]:
 
 # Importing the necessary packages
 import matplotlib.pyplot as plt
@@ -19,8 +19,7 @@ from moviepy.editor import VideoFileClip
 from IPython.display import HTML
 
 
-# In[9]:
-
+# In[ ]:
 
 # Constants
 kTestImagesRelativeInputPathDir = "test_images/"
@@ -29,12 +28,16 @@ kTestVideosRelativeInputPathDir = "test_videos/"
 kTestVideosRelativeOutputPathDir = "test_videos_output/"
 
 # Global variable(s)
-
 global_previous_left_lane_bottom_roi_intersection_point = (0,0)
 global_previous_right_lane_bottom_roi_intersection_point = (0,0)
 
 # This boolean is used to determine if we need to produce intermediate image artifacts, after each processing operation like Gray Scaling etc.
+# These artifacts are useful for debugging
+# The artifacts once generated are placed within the 'test_images_output' folder
 generateIntermediateArtifacts = False
+
+
+# In[ ]:
 
 # Helper method(s)
 def get_region_of_interest_vertices(image):
@@ -210,42 +213,158 @@ def process_image(image):
 
     return original_image_overlaid_with_lanes
 
-# # Using the Pipeline above to process image(s)
+
+# In[16]:
+
+# # Using the Pipeline above to process image(s) - solidWhiteCurve.jpg
 generateIntermediateArtifacts = False
-testImagesInputDirectory = os.listdir(kTestImagesRelativeInputPathDir)
-for imageFile in testImagesInputDirectory:
-    if '.jpg' in imageFile:
-        global_previous_left_lane_bottom_roi_intersection_point = (0,0)
-        global_previous_right_lane_bottom_roi_intersection_point = (0,0)
-        input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
-        output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
-        image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
-        plt.imshow(image_with_detected_lanes)
-        plt.savefig(output_file_relative_path)
+imageFile =  "solidWhiteCurve.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
 
-# # Using the Pipeline above to process video(s)
+
+# In[17]:
+
+# # Using the Pipeline above to process image(s) - solidWhiteRight.jpg
 generateIntermediateArtifacts = False
-testVideosInputDirectory = os.listdir(kTestVideosRelativeInputPathDir)
-for videoFile in testVideosInputDirectory:
-       if '.mp4' in videoFile:
-           global_previous_left_lane_bottom_roi_intersection_point = (0,0)
-           global_previous_right_lane_bottom_roi_intersection_point = (0,0)
-           input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
-           output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
-           input_clip = VideoFileClip(input_videofile_relative_path)
-           output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
-           get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
+imageFile =  "solidWhiteRight.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
 
 
+# In[18]:
 
-# In[119]:
+# # Using the Pipeline above to process image(s) - solidYellowCurve.jpg
+generateIntermediateArtifacts = False
+imageFile =  "solidYellowCurve.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
 
 
+# In[19]:
+
+# # Using the Pipeline above to process image(s) - solidYellowCurve2.jpg
+generateIntermediateArtifacts = False
+imageFile =  "solidYellowCurve2.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
 
 
-# In[ ]:
+# In[20]:
+
+# # Using the Pipeline above to process image(s) - solidYellowLeft.jpg
+generateIntermediateArtifacts = False
+imageFile =  "solidYellowLeft.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
 
 
+# In[21]:
+
+# # Using the Pipeline above to process image(s) - whiteCarLaneSwitch.jpg
+generateIntermediateArtifacts = False
+imageFile =  "whiteCarLaneSwitch.jpg"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_file_relative_path = kTestImagesRelativeInputPathDir + imageFile
+output_file_relative_path = kTestImagesRelativeOutputPathDir + imageFile
+image_with_detected_lanes = process_image(mpimg.imread(input_file_relative_path))
+plt.imshow(image_with_detected_lanes)
+plt.savefig(output_file_relative_path)
+
+
+# In[22]:
+
+# # Using the Pipeline above to process video(s) - solidWhiteRight.mp4
+generateIntermediateArtifacts = False
+videoFile =  "solidWhiteRight.mp4"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
+output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
+input_clip = VideoFileClip(input_videofile_relative_path)
+output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
+get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
+
+
+# In[24]:
+
+HTML("""
+<video width="960" height="540" controls>
+  <source src="{0}">
+</video>
+""".format(output_file_relative_path))
+
+
+# In[29]:
+
+# # Using the Pipeline above to process video(s) - solidYellowLeft.mp4
+generateIntermediateArtifacts = False
+videoFile =  "solidYellowLeft.mp4"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
+output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
+input_clip = VideoFileClip(input_videofile_relative_path)
+output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
+get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
+
+
+# In[30]:
+
+HTML("""
+<video width="960" height="540" controls>
+  <source src="{0}">
+</video>
+""".format(output_file_relative_path))
+
+
+# In[26]:
+
+# # Using the Pipeline above to process video(s) - challenge.mp4
+generateIntermediateArtifacts = False
+videoFile =  "challenge.mp4"
+global_previous_left_lane_bottom_roi_intersection_point = (0,0)
+global_previous_right_lane_bottom_roi_intersection_point = (0,0)
+input_videofile_relative_path = kTestVideosRelativeInputPathDir + videoFile
+output_file_relative_path = kTestVideosRelativeOutputPathDir + videoFile
+input_clip = VideoFileClip(input_videofile_relative_path)
+output_clip = input_clip.fl_image(process_image) #NOTE: this function expects color images!!
+get_ipython().magic('time output_clip.write_videofile(output_file_relative_path, audio=False)')
+
+
+# In[28]:
+
+HTML("""
+<video width="960" height="540" controls>
+  <source src="{0}">
+</video>
+""".format(output_file_relative_path))
 
 
 # In[ ]:
