@@ -77,9 +77,10 @@ The goals / steps of this project are the following:
 
 **In order to draw a single line on the left and right lanes, I modified the draw_lines() function by :**
 1. Categorizing the line segment(s) from hough transform within the region of interest, into left lane, or right lane, using the slope. ( > 0, or < 0).
-2. From the left and right lane line(s) determining the longest straight line, and using that as a reference line.
-3. Determining the point of intersection of the above reference line(s) with the top line and bottom line representing the region of interest.
-4. Connecting the intersection point(s) on the left to create the solid left lane, and doing the same for the right lane.
+2. From the array of left categoried line(s) picking the longest straight line, and using that as a reference left lane line to compute slope.
+3. Determining the point of intersection of the above reference line with region of interest's top line and bottom line and then connecting the intersection points to get a single left lane line.
+4. From the array of right categoried line(s) picking the longest straight line, and using that as a reference right lane line to compute slope.
+5. Determining the point of intersection of the above reference line with region of interest's top line and bottom line and then connecting the intersection points to get a single right lane line.
 
 **Potential shortcomings:**
 
