@@ -139,12 +139,14 @@ def draw_lines(img, lines, color=[255, 0, 0], thickness=10):
  except TypeError: 
         print("Ignoring sporadic type error as noise.")
     
+# Method below is from : http://stackoverflow.com/a/20679579
 def get_line(p1, p2):
     A = (p1[1] - p2[1])
     B = (p2[0] - p1[0])
     C = (p1[0]*p2[1] - p2[0]*p1[1])
     return A, B, -C
 
+# Method below is from : http://stackoverflow.com/a/20679579
 def intersection(L1, L2):
     D  = L1[0] * L2[1] - L1[1] * L2[0]
     Dx = L1[2] * L2[1] - L1[1] * L2[2]
