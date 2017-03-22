@@ -70,6 +70,8 @@ The goals / steps of this project are the following:
 
 * challenge.mp4
 
+For the challenge video, I had to update the region of interest, since the video dimension(s) are different for this video
+
 <video width="432" height="288" controls>
   <source src="test_videos_output/challenge.mp4" type="video/mp4">
 </video>
