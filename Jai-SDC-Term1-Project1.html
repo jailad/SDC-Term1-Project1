@@ -21724,10 +21724,167 @@ Wall time: 39.5 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[26]:</div>
+<div class="prompt input_prompt">In&nbsp;[32]:</div>
 <div class="inner_cell">
     <div class="input_area">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># # Using the Pipeline above to process video(s) - challenge.mp4</span>
+<div class=" highlight hl-ipython3"><pre><span></span><span class="k">def</span> <span class="nf">hough_lines_challenge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">min_line_len</span><span class="p">,</span> <span class="n">max_line_gap</span><span class="p">):</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">HoughLinesP</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">theta</span><span class="p">,</span> <span class="n">threshold</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span> <span class="n">minLineLength</span><span class="o">=</span><span class="n">min_line_len</span><span class="p">,</span> <span class="n">maxLineGap</span><span class="o">=</span><span class="n">max_line_gap</span><span class="p">)</span>
+    <span class="n">line_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+    <span class="n">draw_lines_challenge</span><span class="p">(</span><span class="n">line_img</span><span class="p">,</span> <span class="n">lines</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">line_img</span>
+
+<span class="k">def</span> <span class="nf">process_image_challenge</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="n">currentTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">currentTimeString</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">currentTime</span><span class="p">)</span>
+    <span class="c1"># Important to not modify the original image, but instead work on it&#39;s copy</span>
+    <span class="n">original_image_copy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">greyscale_image</span> <span class="o">=</span> <span class="n">grayscale</span><span class="p">(</span><span class="n">original_image_copy</span><span class="p">)</span>    
+    <span class="n">gaussian_blurred_image</span> <span class="o">=</span> <span class="n">gaussian_blur</span><span class="p">(</span><span class="n">greyscale_image</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">canny_image</span> <span class="o">=</span> <span class="n">canny</span><span class="p">(</span><span class="n">gaussian_blurred_image</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">150</span><span class="p">)</span>
+        
+    <span class="n">region_of_interest_image</span> <span class="o">=</span> <span class="n">region_of_interest</span><span class="p">(</span><span class="n">canny_image</span><span class="p">,</span><span class="n">get_region_of_interest_vertices_challenge</span><span class="p">(</span><span class="n">canny_image</span><span class="p">))</span>
+    
+    <span class="n">hough_lines_image</span> <span class="o">=</span> <span class="n">hough_lines_challenge</span><span class="p">(</span><span class="n">region_of_interest_image</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">original_image_overlaid_with_lanes</span> <span class="o">=</span> <span class="n">weighted_img</span><span class="p">(</span><span class="n">hough_lines_image</span><span class="p">,</span><span class="n">original_image_copy</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">generateIntermediateArtifacts</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">original_image_copy_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_1_original_image_copy.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">original_image_copy</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">original_image_copy_filename</span><span class="p">)</span>
+        
+        <span class="n">greyscale_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_2_grayscale_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">greyscale_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">greyscale_image_filename</span><span class="p">)</span>
+        
+        <span class="n">gaussian_blurred_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_3_gaussian_blurred_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gaussian_blurred_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">gaussian_blurred_image_filename</span><span class="p">)</span>
+        
+        <span class="n">canny_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_4_canny_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">canny_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">canny_image_filename</span><span class="p">)</span>
+        
+        <span class="n">region_of_interest_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_5_region_of_interest_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">region_of_interest_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">region_of_interest_image_filename</span><span class="p">)</span>
+        
+        <span class="n">hough_lines_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_6_hough_lines_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">hough_lines_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">hough_lines_image_filename</span><span class="p">)</span>
+        
+    <span class="k">return</span> <span class="n">original_image_overlaid_with_lanes</span>
+
+<span class="k">def</span> <span class="nf">get_region_of_interest_vertices_challenge</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="n">xsize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ysize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">y_offset</span> <span class="o">=</span> <span class="mi">52</span>
+    <span class="n">bottom_offset</span> <span class="o">=</span> <span class="mi">30</span>
+    <span class="n">left_bottom</span> <span class="o">=</span> <span class="p">[</span><span class="mi">240</span><span class="p">,</span> <span class="n">ysize</span> <span class="o">-</span> <span class="n">bottom_offset</span><span class="p">]</span>
+    <span class="n">right_bottom</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1100</span><span class="p">,</span> <span class="n">ysize</span> <span class="o">-</span> <span class="n">bottom_offset</span><span class="p">]</span>
+    <span class="n">left_top</span> <span class="o">=</span> <span class="p">[</span><span class="mi">630</span><span class="p">,</span> <span class="n">ysize</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y_offset</span><span class="p">]</span>
+    <span class="n">right_top</span> <span class="o">=</span> <span class="p">[</span><span class="mi">800</span><span class="p">,</span> <span class="n">ysize</span><span class="o">/</span><span class="mi">2</span> <span class="o">+</span> <span class="n">y_offset</span><span class="p">]</span>
+    <span class="n">region_of_interest_vertices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="n">left_top</span><span class="p">,</span><span class="n">right_top</span><span class="p">,</span><span class="n">right_bottom</span><span class="p">,</span><span class="n">left_bottom</span><span class="p">]],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">region_of_interest_vertices</span>
+
+<span class="k">def</span> <span class="nf">draw_lines_challenge</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="p">[</span><span class="mi">255</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+        
+ <span class="k">try</span><span class="p">:</span>
+    <span class="k">global</span> <span class="n">global_previous_left_lane_bottom_roi_intersection_point</span>
+    <span class="k">global</span> <span class="n">global_previous_right_lane_bottom_roi_intersection_point</span>
+    <span class="n">leftLaneLineMaxLength</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">rightLaneLineMaxLength</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">longestLeftLaneLine</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">longestRightLaneLine</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">y2</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">dy</span> <span class="o">=</span> <span class="n">y2</span> <span class="o">-</span> <span class="n">y1</span>
+            <span class="n">dx</span> <span class="o">=</span> <span class="n">x2</span> <span class="o">-</span> <span class="n">x1</span>
+            <span class="n">slope</span> <span class="o">=</span> <span class="n">dy</span> <span class="o">/</span> <span class="n">dx</span>
+            <span class="n">lineLength</span> <span class="o">=</span> <span class="n">sqrt</span><span class="p">(</span><span class="n">dy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">dx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="n">slope</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+               <span class="k">if</span><span class="p">(</span><span class="n">lineLength</span> <span class="o">&gt;</span> <span class="n">leftLaneLineMaxLength</span><span class="p">):</span>
+                    <span class="n">leftLaneLineMaxLength</span> <span class="o">=</span> <span class="n">lineLength</span>
+                    <span class="n">longestLeftLaneLine</span> <span class="o">=</span> <span class="n">line</span>
+                    
+            <span class="k">elif</span> <span class="n">slope</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+               <span class="k">if</span><span class="p">(</span><span class="n">lineLength</span> <span class="o">&gt;</span> <span class="n">rightLaneLineMaxLength</span><span class="p">):</span>
+                    <span class="n">rightLaneLineMaxLength</span> <span class="o">=</span> <span class="n">lineLength</span>
+                    <span class="n">longestRightLaneLine</span> <span class="o">=</span> <span class="n">line</span>                
+    
+    <span class="n">region_of_interest_vertices</span> <span class="o">=</span> <span class="n">get_region_of_interest_vertices_challenge</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">region_of_interest_left_top</span> <span class="o">=</span> <span class="n">region_of_interest_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">region_of_interest_right_top</span> <span class="o">=</span> <span class="n">region_of_interest_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">region_of_interest_right_bottom</span> <span class="o">=</span> <span class="n">region_of_interest_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">region_of_interest_left_bottom</span> <span class="o">=</span> <span class="n">region_of_interest_vertices</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span>
+    
+    <span class="n">region_of_interest_top_line</span> <span class="o">=</span> <span class="n">get_line</span><span class="p">(</span><span class="n">region_of_interest_left_top</span><span class="p">,</span> <span class="n">region_of_interest_right_top</span><span class="p">)</span>
+    <span class="n">region_of_interest_bottom_line</span> <span class="o">=</span> <span class="n">get_line</span><span class="p">(</span><span class="n">region_of_interest_left_bottom</span><span class="p">,</span> <span class="n">region_of_interest_right_bottom</span><span class="p">)</span>
+
+    <span class="n">longest_left_lane_line</span> <span class="o">=</span> <span class="n">get_line</span><span class="p">([</span><span class="n">longestLeftLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">longestLeftLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]],[</span><span class="n">longestLeftLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">longestLeftLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]])</span>
+    
+    <span class="n">longest_right_lane_line</span> <span class="o">=</span> <span class="n">get_line</span><span class="p">([</span><span class="n">longestRightLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">longestRightLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]],[</span><span class="n">longestRightLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">longestRightLaneLine</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]])</span>
+    
+    <span class="n">top_left_intersection_point</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">(</span><span class="n">region_of_interest_top_line</span><span class="p">,</span> <span class="n">longest_left_lane_line</span><span class="p">)</span>
+    <span class="n">bottom_left_intersection_point</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">(</span><span class="n">region_of_interest_bottom_line</span><span class="p">,</span> <span class="n">longest_left_lane_line</span><span class="p">)</span>    
+    <span class="k">if</span> <span class="n">global_previous_left_lane_bottom_roi_intersection_point</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">global_previous_left_lane_bottom_roi_intersection_point</span> <span class="o">=</span> <span class="n">bottom_left_intersection_point</span>
+        
+    <span class="n">top_right_intersection_point</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">(</span><span class="n">region_of_interest_top_line</span><span class="p">,</span> <span class="n">longest_right_lane_line</span><span class="p">)</span>
+    <span class="n">bottom_right_intersection_point</span> <span class="o">=</span> <span class="n">intersection</span><span class="p">(</span><span class="n">region_of_interest_bottom_line</span><span class="p">,</span> <span class="n">longest_right_lane_line</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">global_previous_right_lane_bottom_roi_intersection_point</span> <span class="o">==</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">global_previous_right_lane_bottom_roi_intersection_point</span> <span class="o">=</span> <span class="n">bottom_right_intersection_point</span>
+    
+    <span class="k">if</span> <span class="p">(</span><span class="n">top_left_intersection_point</span> <span class="ow">and</span> <span class="n">bottom_left_intersection_point</span> <span class="ow">and</span> <span class="n">top_right_intersection_point</span> <span class="ow">and</span> <span class="n">bottom_right_intersection_point</span><span class="p">):</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">top_left_intersection_point</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">global_previous_left_lane_bottom_roi_intersection_point</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+        <span class="n">cv2</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">top_right_intersection_point</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">global_previous_right_lane_bottom_roi_intersection_point</span><span class="p">),</span> <span class="n">color</span><span class="p">,</span> <span class="n">thickness</span><span class="p">)</span>
+
+ <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Ignoring sporadic type error as noise.&quot;</span><span class="p">)</span>
+        
+<span class="k">def</span> <span class="nf">process_image_challenge</span><span class="p">(</span><span class="n">image</span><span class="p">):</span>
+    <span class="n">currentTime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="n">currentTimeString</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">currentTime</span><span class="p">)</span>
+    <span class="c1"># Important to not modify the original image, but instead work on it&#39;s copy</span>
+    <span class="n">original_image_copy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">image</span><span class="p">)</span>
+    <span class="n">greyscale_image</span> <span class="o">=</span> <span class="n">grayscale</span><span class="p">(</span><span class="n">original_image_copy</span><span class="p">)</span>    
+    <span class="n">gaussian_blurred_image</span> <span class="o">=</span> <span class="n">gaussian_blur</span><span class="p">(</span><span class="n">greyscale_image</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
+    <span class="n">canny_image</span> <span class="o">=</span> <span class="n">canny</span><span class="p">(</span><span class="n">gaussian_blurred_image</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">150</span><span class="p">)</span>
+
+    <span class="n">region_of_interest_image</span> <span class="o">=</span> <span class="n">region_of_interest</span><span class="p">(</span><span class="n">canny_image</span><span class="p">,</span><span class="n">get_region_of_interest_vertices_challenge</span><span class="p">(</span><span class="n">canny_image</span><span class="p">))</span>
+    <span class="n">hough_lines_image</span> <span class="o">=</span> <span class="n">hough_lines_challenge</span><span class="p">(</span><span class="n">region_of_interest_image</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">180</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+    <span class="n">original_image_overlaid_with_lanes</span> <span class="o">=</span> <span class="n">weighted_img</span><span class="p">(</span><span class="n">hough_lines_image</span><span class="p">,</span><span class="n">original_image_copy</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">generateIntermediateArtifacts</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">original_image_copy_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_1_original_image_copy.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">original_image_copy</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">original_image_copy_filename</span><span class="p">)</span>
+        
+        <span class="n">greyscale_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_2_grayscale_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">greyscale_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">greyscale_image_filename</span><span class="p">)</span>
+        
+        <span class="n">gaussian_blurred_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_3_gaussian_blurred_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">gaussian_blurred_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">gaussian_blurred_image_filename</span><span class="p">)</span>
+        
+        <span class="n">canny_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_4_canny_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">canny_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">canny_image_filename</span><span class="p">)</span>
+        
+        <span class="n">region_of_interest_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_5_region_of_interest_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">region_of_interest_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">region_of_interest_image_filename</span><span class="p">)</span>
+        
+        <span class="n">hough_lines_image_filename</span> <span class="o">=</span> <span class="n">kTestImagesRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">currentTimeString</span> <span class="o">+</span> <span class="s2">&quot;_6_hough_lines_image.jpg&quot;</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">hough_lines_image</span><span class="p">,</span><span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">hough_lines_image_filename</span><span class="p">)</span>       
+
+    <span class="k">return</span> <span class="n">original_image_overlaid_with_lanes</span>
+
+<span class="c1"># # Using the Pipeline above to process video(s) - challenge.mp4</span>
 <span class="n">generateIntermediateArtifacts</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">videoFile</span> <span class="o">=</span>  <span class="s2">&quot;challenge.mp4&quot;</span>
 <span class="n">global_previous_left_lane_bottom_roi_intersection_point</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
@@ -21735,7 +21892,7 @@ Wall time: 39.5 s
 <span class="n">input_videofile_relative_path</span> <span class="o">=</span> <span class="n">kTestVideosRelativeInputPathDir</span> <span class="o">+</span> <span class="n">videoFile</span>
 <span class="n">output_file_relative_path</span> <span class="o">=</span> <span class="n">kTestVideosRelativeOutputPathDir</span> <span class="o">+</span> <span class="n">videoFile</span>
 <span class="n">input_clip</span> <span class="o">=</span> <span class="n">VideoFileClip</span><span class="p">(</span><span class="n">input_videofile_relative_path</span><span class="p">)</span>
-<span class="n">output_clip</span> <span class="o">=</span> <span class="n">input_clip</span><span class="o">.</span><span class="n">fl_image</span><span class="p">(</span><span class="n">process_image</span><span class="p">)</span> <span class="c1">#NOTE: this function expects color images!!</span>
+<span class="n">output_clip</span> <span class="o">=</span> <span class="n">input_clip</span><span class="o">.</span><span class="n">fl_image</span><span class="p">(</span><span class="n">process_image_challenge</span><span class="p">)</span> <span class="c1">#NOTE: this function expects color images!!</span>
 <span class="o">%</span><span class="k">time</span> output_clip.write_videofile(output_file_relative_path, audio=False)
 </pre></div>
 
@@ -21761,1017 +21918,7 @@ Wall time: 39.5 s
 <div class="prompt"></div>
 
 <div class="output_subarea output_stream output_stderr output_text">
-<pre>  1%|          | 3/251 [00:00&lt;00:08, 29.75it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>  2%|▏         | 6/251 [00:00&lt;00:08, 29.53it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>  5%|▍         | 12/251 [00:00&lt;00:08, 29.16it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 10%|█         | 26/251 [00:00&lt;00:07, 30.29it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 12%|█▏        | 30/251 [00:00&lt;00:07, 31.20it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 17%|█▋        | 42/251 [00:01&lt;00:06, 30.68it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 20%|██        | 51/251 [00:02&lt;00:16, 11.77it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 22%|██▏       | 55/251 [00:03&lt;00:19, 10.17it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 24%|██▎       | 59/251 [00:03&lt;00:19,  9.65it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 25%|██▌       | 63/251 [00:03&lt;00:20,  9.37it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 27%|██▋       | 67/251 [00:04&lt;00:19,  9.22it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 28%|██▊       | 70/251 [00:04&lt;00:21,  8.45it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 29%|██▉       | 73/251 [00:05&lt;00:21,  8.20it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 31%|███       | 77/251 [00:05&lt;00:22,  7.79it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 31%|███▏      | 79/251 [00:05&lt;00:20,  8.39it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 32%|███▏      | 81/251 [00:06&lt;00:22,  7.53it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 33%|███▎      | 84/251 [00:06&lt;00:22,  7.36it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 34%|███▍      | 86/251 [00:06&lt;00:20,  8.02it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 36%|███▌      | 90/251 [00:07&lt;00:19,  8.07it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 36%|███▋      | 91/251 [00:07&lt;00:18,  8.54it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 37%|███▋      | 94/251 [00:07&lt;00:19,  7.94it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 38%|███▊      | 95/251 [00:07&lt;00:18,  8.46it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 39%|███▉      | 99/251 [00:08&lt;00:18,  8.28it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 41%|████      | 102/251 [00:08&lt;00:18,  8.06it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 42%|████▏     | 105/251 [00:09&lt;00:18,  7.78it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 43%|████▎     | 108/251 [00:09&lt;00:19,  7.24it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 44%|████▍     | 110/251 [00:09&lt;00:18,  7.59it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 45%|████▍     | 112/251 [00:10&lt;00:18,  7.38it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 46%|████▌     | 115/251 [00:10&lt;00:16,  8.42it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 47%|████▋     | 117/251 [00:10&lt;00:19,  6.98it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 47%|████▋     | 119/251 [00:10&lt;00:16,  7.89it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 49%|████▉     | 123/251 [00:11&lt;00:16,  7.54it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 49%|████▉     | 124/251 [00:11&lt;00:19,  6.38it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 51%|█████     | 127/251 [00:12&lt;00:16,  7.31it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 52%|█████▏    | 131/251 [00:12&lt;00:16,  7.32it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 53%|█████▎    | 132/251 [00:12&lt;00:18,  6.58it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 54%|█████▍    | 136/251 [00:13&lt;00:16,  6.80it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 55%|█████▌    | 139/251 [00:13&lt;00:14,  7.74it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 59%|█████▊    | 147/251 [00:14&lt;00:13,  7.84it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 60%|██████    | 151/251 [00:15&lt;00:12,  7.75it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 62%|██████▏   | 155/251 [00:16&lt;00:12,  7.89it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 62%|██████▏   | 156/251 [00:16&lt;00:14,  6.56it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 63%|██████▎   | 159/251 [00:16&lt;00:11,  7.88it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 64%|██████▍   | 161/251 [00:16&lt;00:13,  6.62it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 66%|██████▌   | 165/251 [00:17&lt;00:13,  6.56it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 67%|██████▋   | 169/251 [00:18&lt;00:12,  6.68it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 69%|██████▊   | 172/251 [00:18&lt;00:12,  6.53it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 70%|███████   | 176/251 [00:19&lt;00:11,  6.34it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 72%|███████▏  | 181/251 [00:19&lt;00:11,  6.10it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 75%|███████▍  | 187/251 [00:20&lt;00:09,  6.79it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 76%|███████▌  | 190/251 [00:21&lt;00:09,  6.57it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 81%|████████  | 203/251 [00:23&lt;00:06,  7.28it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 86%|████████▌ | 216/251 [00:24&lt;00:04,  7.64it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 88%|████████▊ | 222/251 [00:25&lt;00:03,  8.56it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 90%|████████▉ | 225/251 [00:25&lt;00:03,  8.16it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 93%|█████████▎| 234/251 [00:26&lt;00:01,  8.62it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 96%|█████████▌| 240/251 [00:27&lt;00:01,  7.55it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre> 98%|█████████▊| 246/251 [00:28&lt;00:00,  8.13it/s]</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stdout output_text">
-<pre>Ignoring sporadic type error as noise.
-</pre>
-</div>
-</div>
-
-<div class="output_area">
-<div class="prompt"></div>
-
-<div class="output_subarea output_stream output_stderr output_text">
-<pre>100%|██████████| 251/251 [00:28&lt;00:00,  8.18it/s]
+<pre>100%|██████████| 251/251 [00:29&lt;00:00,  8.06it/s]
 </pre>
 </div>
 </div>
@@ -22783,8 +21930,8 @@ Ignoring sporadic type error as noise.
 <pre>[MoviePy] Done.
 [MoviePy] &gt;&gt;&gt;&gt; Video ready: test_videos_output/challenge.mp4 
 
-CPU times: user 4.17 s, sys: 250 ms, total: 4.42 s
-Wall time: 32.1 s
+CPU times: user 4.49 s, sys: 320 ms, total: 4.81 s
+Wall time: 32.8 s
 </pre>
 </div>
 </div>
@@ -22795,7 +21942,7 @@ Wall time: 32.1 s
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[28]:</div>
+<div class="prompt input_prompt">In&nbsp;[33]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="n">HTML</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
@@ -22814,7 +21961,7 @@ Wall time: 32.1 s
 
 
 <div class="output_area">
-<div class="prompt output_prompt">Out[28]:</div>
+<div class="prompt output_prompt">Out[33]:</div>
 
 
 <div class="output_html rendered_html output_subarea output_execute_result">
